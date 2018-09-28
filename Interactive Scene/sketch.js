@@ -23,13 +23,17 @@ let x;
 let y;
 let dx;
 let dy;
+let scroller;
+let timeBetween;
 
 function preload() {
   imgMan = loadImage("assets/Stk.png");
   imgGun0 = loadImage("assets/Pistol.png");
   imgGun1 = loadImage("assets/Shotgun.png");
   imgGun2 = loadImage("assets/AK47.png");
-  imgGun3 = loadImage("assets/PenguinGun.png");
+  imgGun3 = loadImage("assets/Rifle.png");
+  imgGun4 = loadImage("assets/PenguinGun.png");
+  imgBang = loadImage("assets/bangBang.png");
 }
 
 function setup() {
@@ -37,6 +41,7 @@ function setup() {
   pistolAmmo = 20;
   blunderAmmo = 5;
   AK47Ammo = 60;
+  rifleAmmo = 10;
   penguinAmmo = 0;
   health = 1000;
   dead = false;
@@ -48,11 +53,15 @@ function setup() {
   y = (windowHeight/2);
   dx = 5;
   dy = 5;
+  scroller = 0;
 }
 
 function draw() {
   moveMan();
   displayMan();
+  displayGun();
+  switchGun();
+  playSound();
  }
 
 function moveMan() {
@@ -74,33 +83,66 @@ function moveMan() {
 
 function displayMan() {
   background(255);
-
   image(imgMan, x, y);
-  if (gun === 0) {
-    image(imgGun0, (x + 9), (y + 15));
+}
+
+function displayGun() {
+  if (gun % 5 === 0) {
+    image(imgGun0, (x + 9), (y + 10));
   }
-  else if (gun === 1) {
-    image(imgGun1, (x + 9), (y + 15));
+  else if ((gun - 1)% 5 === 0) {
+    image(imgGun3, (x + 9), (y + 10));
   }
-  else if (gun === 2) {
-    image(imgGun2, (x + 9), (y + 15));
+  else if ((gun - 2)% 5 === 0) {
+    image(imgGun1, (x + 9), (y + 10));
   }
-  else if (gun === 3) {
-    image(imgGun3, (x + 9), (y + 15));
+  else if ((gun - 3)% 5 === 0) {
+    image(imgGun4, (x + 9), (y + 10));
+  }
+  else if ((gun - 4)% 5 === 0) {
+    image(imgGun2, (x + 9), (y + 10));
+}
+
+}
+
+function mouseWheel(event) {
+  print(event.delta);
+  if (event.delta > 0) {
+    scroller += 2;
+  }
+  else if (event.delta < 0) {
+    scroller -= 2;
   }
 }
 
-function calculateAngle() {
-  if (mouseX > x && mouseY > y) {
-    gunAngle = (acos((mouseX - x)/(mouseY - y)))
+function switchGun() {
+  gun = scroller;
+}
+
+function playSound() {
+  while (mouseIsPressed && (gun % 5 === 0)) {
+    timeBetween = 6;
+    image(imgBang, (x + 9), (y + 10));
+    pause(timeBetween);
   }
-  else if (mouseX < x && mouseY > y) {
-    gunAngle = (acos((mouseX - x)/(mouseY - y)))
+  while (mouseIsPressed && ((gun - 2)% 5 === 0)) {
+    timeBetween = 8;
+    image(imgBang, (x + 9), (y + 10));
+    pause(timeBetween);
   }
-  else if (mouseX > x && mouseY < y) {
-    gunAngle = (acos((mouseX - x)/(mouseY - y)))
+  while (mouseIsPressed && ((gun - 4)% 5 === 0)) {
+    timeBetween = 4;
+    image(imgBang, (x + 9), (y + 10));
+    pause(timeBetween);
   }
-  else if (mouseX < x && mouseY < y) {
-    gunAngle = (acos((mouseX - x)/(mouseY - y)))
+  while (mouseIsPressed && ((gun - 1)% 5 === 0)) {
+    timeBetween = 12;
+    image(imgBang, (x + 9), (y + 10));
+    pause(timeBetween);
+  }
+  while (mouseIsPressed && ((gun - 3)% 5 === 0)) {
+    timeBetween = 2;
+    image(imgBang, (x + 9), (y + 10));
+    pause(timeBetween);
   }
 }
