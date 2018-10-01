@@ -34,7 +34,7 @@ function preload() {
   imgGun2 = loadImage("assets/AK47.png");
   imgGun3 = loadImage("assets/Rifle.png");
   imgGun4 = loadImage("assets/PenguinGun.png");
-  imgBang = loadImage("assets/bangBang.png");
+  imgBang = loadImage("assets/BangBang.png");
   imgBlargh = loadImage("assets/PenguinGunFiring.png");
 }
 
