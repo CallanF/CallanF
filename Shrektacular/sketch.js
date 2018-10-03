@@ -22,6 +22,7 @@ let scalar;
 function preload() {
   imgShrek = loadImage("assets/Shrek Is Not Drek.png");
   imgSwamp = loadImage("assets/Swumpy.png");
+  imgFarquaadCastle = loadImage("assets/Duloc.jpg");
 }
 
 function setup() {
@@ -35,6 +36,7 @@ function setup() {
 function draw() {
   locationShrek();
   Shrookles();
+  detectStateChange();
 }
 
 function Shrookles() {
@@ -46,12 +48,25 @@ function locationShrek() {
     image(imgSwamp, 0, 0, windowWidth, windowHeight);
   }
   else if (state === 1) {
-    image(imgSwamp, 0, 0, windowWidth, windowHeight);
+    image(imgFarquaadCastle, 0, 0, windowWidth, windowHeight);
   }
   else if (state === 2) {
     image(imgSwamp, 0, 0, windowWidth, windowHeight);
   }
   else if (state === 3) {
     image(imgSwamp, 0, 0, windowWidth, windowHeight);
+  }
+}
+
+function detectStateChange() {
+  if (mouseIsPressed && mouseX <= 50) {
+    if (state === 0) {
+      state = 1;
+    }
+  }
+  if (mouseIsPressed && mouseX >= windowWidth - 50) {
+    if (state === 1) {
+      state = 0;
+    }
   }
 }
