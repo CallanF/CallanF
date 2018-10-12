@@ -72,10 +72,12 @@ function locationShrek() {
   else if (state === 1) {
     image(imgFarquaadCastle, middleX, middleY, windowWidth, windowHeight);
     image(imgArrRt, middleX + 700, middleY, width/10, height/4);
+    image(imgArrUp, middleX, middleY + 200, width/4, height/10);
   }
   else if (state === 2) {
     image(imgThrone, middleX, middleY, windowWidth, windowHeight);
     image(imgFarquaad, middleX, middleY, width * scalar, height * scalar);
+    image(imgArrDn, middleX, middleY + 300, width/4, height/10);
   }
   else if (state === 3) {
     image(imgSwamp, middleX, middleY, windowWidth, windowHeight);
@@ -109,6 +111,12 @@ function detectStateChange() {
   if (mouseIsPressed && mouseX >= middleX - 150 && mouseX <= middleX + 150 && mouseY >= middleY - 200 && mouseY <= middleY + 200) {
     if (state === 1) {
       state = 2;
+      textDone = false;
+    }
+  }
+  if (mouseIsPressed && mouseY >= windowHeight - 50) {
+    if (state === 2) {
+      state = 1;
       textDone = false;
     }
   }
