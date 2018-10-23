@@ -3,16 +3,21 @@
 // Initiated October 3, 2018
 
 let state;
+let mouseReset;
+
 let middleX;
 let middleY;
+
 let arrValXR;
 let arrValYU;
 let arrValXL;
 let arrValYD;
+
 let txtBoxPos;
 let txtShrekPosX;
 let txtShrekPosY;
 let txtShrekSclr;
+
 let txtPos1X;
 let txtPos1Y;
 
@@ -41,12 +46,16 @@ let textDone;
 function preload() {
   imgShrek = loadImage("assets/Shrek Is Not Drek.png");
   imgFarquaad = loadImage("assets/Farquaad.png");
+
   imgSwamp = loadImage("assets/Swumpy.png");
   imgFarquaadCastle = loadImage("assets/Duloc.jpg");
   imgThrone = loadImage("assets/ThroneRoom.jpg");
+  imgSecret = loadImage("assets/Art, plural noun.png");
+
   imgText1 = loadImage("assets/Text1AltWhite.png");
   imgText2 = loadImage("assets/Text2.png");
   imgTextBox = loadImage("assets/TextBox.png");
+
   imgShrlooking = loadImage("assets/ShrekLookingtotheSide - Copy.jpg");
   imgArrUp = loadImage("assets/ArrUp.png");
   imgArrDn = loadImage("assets/ArrDown.png");
@@ -87,6 +96,9 @@ function Shrookles() {
   if (state !== 3) {
     image(imgShrek, mouseX, mouseY, imgShrek.width * scalar, imgShrek.height * scalar);
   }
+  if (mouseX >= 50 && mouseX <= windowWidth - 50 && mouseY > 50 && mouseY < windowHeight - 50) {
+    mouseReset = true;
+  }
 }
 
 function locationShrek() {
@@ -112,7 +124,7 @@ function locationShrek() {
     }
   }
   else if (state === 3) {
-    image(imgSwamp, middleX, middleY, windowWidth, windowHeight);
+    image(imgSecret, middleX, middleY, windowWidth, windowHeight);
   }
 }
 
@@ -130,26 +142,47 @@ function shrextDisplay() {
 function detectStateChange() {
   if (mouseIsPressed && mouseX <= 50) {
     if (state === 0) {
-      state = 1;
-      textDone = false;
+      if (mouseReset === true) {
+        state = 1;
+        textDone = false;
+        mouseReset = false;
+      }
     }
   }
   if (mouseIsPressed && mouseX >= windowWidth - 50) {
     if (state === 1) {
-      state = 0;
-      textDone = false;
+      if (mouseReset === true) {
+        state = 0;
+        textDone = false;
+        mouseReset = false;
+      }
     }
   }
   if (mouseIsPressed && mouseX >= middleX - 150 && mouseX <= middleX + 150 && mouseY >= middleY - 200 && mouseY <= middleY + 200) {
     if (state === 1) {
-      state = 2;
-      textDone = false;
+      if (mouseReset === true) {
+        state = 2;
+        textDone = false;
+        mouseReset = false;
+      }
     }
   }
   if (mouseIsPressed && mouseY >= windowHeight - 50) {
     if (state === 2) {
-      state = 1;
-      textDone = false;
+      if (mouseReset === true) {
+        state = 1;
+        textDone = false;
+        mouseReset = false;
+      }
+    }
+  }
+  if (mouseIsPressed && mouseX <= 50) {
+    if (state === 1) {
+      if (mouseReset === true) {
+        state = 3;
+        textDone = false;
+        mouseReset = false;
+      }
     }
   }
 }

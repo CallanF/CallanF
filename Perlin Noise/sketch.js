@@ -13,7 +13,7 @@ let rects = [];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  numberOfRects = 10;
+  numberOfRects = width;
   rectWidth = width / numberOfRects;
   generateRectangles();
 }
@@ -38,8 +38,8 @@ function generateRectangles() {
     };
 
     rects.push(someRect);
+    time += 0.01;
   }
-  time += 0.01;
 }
 
 function displayRects() {
