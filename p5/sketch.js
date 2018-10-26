@@ -1,50 +1,70 @@
-// Project Title
-// Your Name
-// Date
-//
-// Extra for Experts:
-// - describe what you did to take this project "above and beyond"
+//Mountain Climber
+//Callan F.
+//Initiated Oct. 26, 2018
 
-let board = [[0, 1, 0, 0],
-  [0, 0, 0, 1],
-  [0, 0, 0, 0],
-  [0, 1, 0, 0]];
-let numRectX;
-let numRectY;
-let rectWidth;
-let rectHeight;
-let isBlack;
-let posX;
-let posY;
+let touchingGround = true;
+let touchingWallL = false;
+let touchingWallR = false;
+
+let heroX = 300;
+let heroY = 300;
+let dx = 0;
+let dy = 0;
+
+let doubleJumpUsed = false;
+
+let imgHero;
+
+function preload() {
+  imgHero = loadImage("assets/Stk.png");
+}
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  rectMode(CENTER);
-  numRectX = 4;
-  numRectY = 4;
-  rectWidth = windowWidth/numRectX;
-  rectHeight = windowHeight/numRectY;
+  createCanvas(600, 600);
+  imageMode(CENTER);
 }
 
 function draw() {
-  drawRects();
+  background(128);
+  displayStick();
+  move();
+  jump();
+  fall();
 }
 
-function drawRects() {
-  for (let i = board[0]; i < board; i++) {
-    for (let j = board[0][0]; j < board[i]; j++) {
-      if (j === 1) {
-        posX = windowWidth / numRectX * board[i];
-        posY = windowHeight / numRectY * board[j];
-        fill(255);
-        rect(posX, posY, rectWidth, rectHeight);
-      }
-      else if (j === 0) {
-        posX = windowWidth / numRectX * board[i];
-        posY = windowHeight / numRectY * board[j];
-        fill(0);
-        rect(posX, posY, rectWidth, rectHeight);
-      }
+function displayStick() {
+  let hero = image(imgHero, heroX, heroY);
+  heroX = heroX + dx;
+  heroY = heroY + dy;
+}
+
+function jump() {
+  if (keyIsPressed && key === "w") {
+    if (touchingGround === true || doubleJumpUsed === false) {
+      dy = -5;
+      touchingGround = false;
     }
+  }
+}
+
+function fall() {
+  if (touchingGround === false) {
+    for (let j = dy; j > -5; j--) {
+      dy += 1;
+    }
+  }
+}
+
+function move() {
+  if (keyIsPressed) {
+    if (key === "a" && touchingWallL === false) {
+      dx = -5;
+    }
+    if (key === "d" && touchingWallR === false) {
+      dx = 5;
+    }
+  }
+  else if (!keyIsPressed) {
+    dx = 0;
   }
 }
