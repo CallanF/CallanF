@@ -11,6 +11,8 @@ let heroY = 300;
 let dx = 0;
 let dy = 0;
 
+let maxFall;
+
 let doubleJumpUsed = false;
 
 let imgHero;
@@ -44,19 +46,23 @@ function setup() {
     cols = 25;
   }
   cellSize = windowWidth / rows;
+
+  maxFall = 5;
 }
 
 function draw() {
   background(128);
-  displayGrid();
+  // displayGrid();
   displayStick();
+  detectWalls();
   move();
   fall();
   jump();
 }
 
 function displayStick() {
-  let hero = image(imgHero, heroX, heroY);
+  //Other options: 9.5 by 31.5 (50%), 14.25 by 47.25 (75%), or 19 by 63 (100%)
+  let hero = image(imgHero, heroX, heroY, 14.25, 47.25);
   heroX = heroX + dx;
   heroY = heroY + dy;
 }
@@ -76,9 +82,34 @@ function jump() {
 
 function fall() {
   if (touchingGround === false) {
-    if (dy < 5) {
-      dy += 0.1;
+    if (dy < maxFall) {
+      if (keyIsPressed === true && key === "s") {
+        dy += 0.4;
+        maxFall = 8;
+      }
+      else {
+        dy += 0.1;
+        maxFall = 5;
+      }
     }
+    if (dy > maxFall) {
+      dy -= 0.2;
+    }
+  }
+}
+
+function detectWalls() {
+  if (heroX + 1 >= 600) {
+    touchingWallL = true;
+  }
+  else {
+    touchingWallL = false;
+  }
+  if (heroX - 1 <= -600) {
+    touchingWallR = true;
+  }
+  else {
+    touchingWallR = false;
   }
 }
 
