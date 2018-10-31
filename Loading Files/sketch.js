@@ -12,17 +12,14 @@ function preload() {
 }
 
 function setup() {
-  if (windowWidth > windowHeight) {
-    createCanvas(windowHeight, windowHeight);
-  }
-  else {
-    createCanvas(windowWidth, windowWidth);
-    cleanUpTheGrid();
-  }
+  createCanvas(600, 600);
+
   rows = grid[0].length;
   cols = grid[0]. length;
 
   cellSize = width / cols;
+
+  cleanUpTheGrid();
   // grid = createRandom2dArray(cols, rows);
 }
 
@@ -37,17 +34,17 @@ function cleanUpTheGrid() {
   }
 }
 
-function keyTyped() {
-  if (key === "r") {
-    grid = createRandom2dArray(cols, rows);
-  }
-  // else if (key === " ") {
-  //   update();
-  // }
-  else if (key === "e") {
-    resetGrid();
-  }
-}
+// function keyTyped() {
+//   if (key === "r") {
+//     grid = createRandom2dArray(cols, rows);
+// }
+//   // else if (key === " ") {
+//   //   update();
+//   // }
+//   else if (key === "e") {
+//     resetGrid();
+//   }
+// }
 
 // function update() {
 //   //need a second 2d array, so you don't mess up the first one
@@ -131,18 +128,18 @@ function resetGrid() {
 }
 
 
-function createRandom2dArray(cols, rows) {
-  let randomGrid = [];
-  for (let y = 0; y < rows; y++) {
-    randomGrid.push([]);
-    for (let x = 0; x < cols; x++) {
-      if (random(100) < 50) {
-        randomGrid[y].push(0);
-      }
-      else {
-        randomGrid[y].push(1);
-      }
-    }
-  }
-  return randomGrid;
-}
+// function createRandom2dArray(cols, rows) {
+//   let randomGrid = [];
+//   for (let y = 0; y < rows; y++) {
+//     randomGrid.push([]);
+//     for (let x = 0; x < cols; x++) {
+//       if (random(100) < 50) {
+//         randomGrid[y].push(0);
+//       }
+//       else {
+//         randomGrid[y].push(1);
+//       }
+//     }
+//   }
+//   return randomGrid;
+// }
