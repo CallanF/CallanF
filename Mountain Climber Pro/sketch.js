@@ -48,11 +48,13 @@ function setup() {
   cellSize = windowWidth / rows;
 
   maxFall = 5;
+
+  grid = generateGrid(cols, rows);
 }
 
 function draw() {
   background(128);
-  // displayGrid();
+  displayGrid();
   displayStick();
   detectWalls();
   move();
@@ -128,7 +130,6 @@ function move() {
 }
 
 function displayGrid() {
-  grid = generateGrid();
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === 0) {
@@ -144,7 +145,7 @@ function displayGrid() {
   return grid;
 }
 
-function generateGrid() {
+function generateGrid(cols, rows) {
   let randomGrid = [];
   for (let y = 0; y < rows; y++) {
     randomGrid[y].push([]);

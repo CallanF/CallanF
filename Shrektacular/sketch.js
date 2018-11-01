@@ -3,6 +3,7 @@
 // Initiated October 3, 2018
 
 let state;
+let stateChanged;
 let mouseReset;
 
 let middleX;
@@ -69,6 +70,7 @@ function setup() {
   middleY = windowHeight / 2;
   scalar = 0.25;
   state = 0;
+  stateChanged = false;
   textDone = false;
   arrValXR = windowWidth - windowWidth / 10;
   arrValYU = windowHeight / 8;
@@ -84,6 +86,7 @@ function setup() {
 }
 
 function draw() {
+  mouseSort();
   locationShrek();
   Shrookles();
   shrextDisplay();
@@ -145,6 +148,7 @@ function detectStateChange() {
       if (mouseReset === true) {
         state = 1;
         textDone = false;
+        stateChanged = true;
         mouseReset = false;
       }
     }
@@ -154,6 +158,7 @@ function detectStateChange() {
       if (mouseReset === true) {
         state = 0;
         textDone = false;
+        stateChanged = true;
         mouseReset = false;
       }
     }
@@ -163,6 +168,7 @@ function detectStateChange() {
       if (mouseReset === true) {
         state = 2;
         textDone = false;
+        stateChanged = true;
         mouseReset = false;
       }
     }
@@ -172,6 +178,7 @@ function detectStateChange() {
       if (mouseReset === true) {
         state = 1;
         textDone = false;
+        stateChanged = true;
         mouseReset = false;
       }
     }
@@ -181,8 +188,21 @@ function detectStateChange() {
       if (mouseReset === true) {
         state = 3;
         textDone = false;
+        stateChanged = true;
         mouseReset = false;
       }
     }
+  }
+}
+
+function mouseSort() {
+  if (mouseIsPressed === true && stateChanged === true) {
+    mouseReset = false;
+  }
+  else if (mouseIsPressed === false) {
+    mouseReset = true;
+  }
+  if (stateChanged === true && mouseIsPressed === false) {
+    stateChanged = false;
   }
 }
