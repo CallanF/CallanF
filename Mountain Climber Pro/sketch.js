@@ -19,7 +19,7 @@ let imgHero;
 
 let difficulty = "normal";
 
-let grid;
+let grid = [];
 
 let rows;
 let cols;
@@ -49,7 +49,7 @@ function setup() {
 
   maxFall = 5;
 
-  grid = generateGrid(cols, rows);
+  grid = cleanupGrid(cols, rows);
 }
 
 function draw() {
@@ -134,39 +134,39 @@ function displayGrid() {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === 0) {
         fill(255);
-        rect(x * cellSize, y * cellSize, cellSize, cellSize);
+        noStroke();
       }
-      if (grid[y][x] === 1) {
+      else {
         fill(0);
-        rect(x * cellSize, y * cellSize, cellSize, cellSize);
       }
+      rect(x * cellSize, y * cellSize, cellSize, cellSize);
     }
   }
-  return grid;
 }
 
 function generateGrid(cols, rows) {
   let randomGrid = [];
   for (let y = 0; y < rows; y++) {
-    randomGrid[y].push([]);
+    randomGrid.push([]);
     for (let x = 0; x < cols; x++) {
       if (random(100) >= 25) {
-        if (!grid[x] === 0) {
-          if (grid[y-1][x] === 1) {
-            randomGrid[y][x].push(1);
-          }
-          else {
-            randomGrid[y][x].push(0);
-          }
-        }
-        else {
-          randomGrid[y][x].push(0);
-        }
+        randomGrid[y].push(1);
       }
       else {
-        randomGrid[y][x].push(0);
+        randomGrid[y].push(0);
       }
     }
   }
   return randomGrid;
+}
+
+function cleanupGrid() {
+  let progressGrid = generateGrid(cols, rows);
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (progressGrid[y-1][x] === 1) {
+        progressGrid[y][x] = 0;
+      }
+    }
+  }
 }

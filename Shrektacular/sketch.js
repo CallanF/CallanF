@@ -161,7 +161,7 @@ function shrextDisplay() {
   if (state === 2 && textState === 3) {
     image(imgTextBox, middleX, middleY + 250, width - 50);
     image(imgFrqFace, middleX - 500, middleY + 250, width / 3.5, height / 3.5);
-    image(imgText4, middleX + 200, middleY + 280, width / 1.5, height / 3.5);
+    image(imgText4, middleX + 230, middleY + 260, width / 1.6, height / 3.5);
   }
 }
 
