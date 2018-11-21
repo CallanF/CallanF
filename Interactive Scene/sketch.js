@@ -6,7 +6,7 @@
 
 let pistolAmmo;
 let blunderAmmo;
-let AK47Ammo;
+let ak47Ammo;
 let penguinAmmo;
 let health;
 let dead;
@@ -42,7 +42,7 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   pistolAmmo = 20;
   blunderAmmo = 5;
-  AK47Ammo = 60;
+  ak47Ammo = 60;
   rifleAmmo = 10;
   penguinAmmo = 0;
   health = 1000;
