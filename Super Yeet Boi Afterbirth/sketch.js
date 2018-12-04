@@ -59,12 +59,24 @@ class Chad {
   }
 
   jump() {
-
+    if (keyIsPressed && key === "w") {
+      if (this.touchingGround === true) {
+        this.dy = -4.5;
+        this.touchingGround = false;
+      }
+    }
   }
+
   fall() {
-
+    if (this.touchingGround === false) {
+      if (this.dy < this.maxFall) {
+        this.dy += 0.15;
+      }
+    }
+    else {
+      this.dy = 0;
+    }
   }
-
 }
 
 class Terrain {
@@ -78,14 +90,18 @@ class Terrain {
       this.dx = 0;
       this.dy = 0;
     }
-    else if (this.type === 1) {
+    if (this.type === 1) {
+      this.dx = 0;
+      this.dy = 0;
+    }
+    else if (this.type === 2) {
       this.dx = 0;
       this.dy = -5;
       if (dist(this.x, this.y, this.ox, this.oy) > 3) {
         this.dy *= -1;
       }
     }
-    else if (this.type === 2) {
+    else if (this.type === 3) {
       this.dx = -5;
       this.dy = 0;
       if (dist(this.x, this.y, this.ox, this.oy) > 3) {
@@ -130,7 +146,9 @@ function draw() {
   background(128);
   chad.display();
   chad.move();
-
+  chad.jump();
+  chad.fall();
+  displayGrid();
 }
 
 function cleanupGrid() {
@@ -148,5 +166,11 @@ function cleanupGrid() {
         terrains.push(ter);
       }
     }
+  }
+}
+
+function displayGrid() {
+  for (let i = 0; i < terrains.length-1; i++) {
+    terrains[i].display();
   }
 }
