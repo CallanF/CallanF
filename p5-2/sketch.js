@@ -13,7 +13,8 @@ let shotList = [];
 let blunList = [];
 
 let playerSprite;
-let creeperSprite;
+let creeperSprite1;
+let creeperSprite2;
 let dasherSprite;
 
 class Player {
@@ -51,8 +52,8 @@ class Player {
         }
       }
       else if (gun === 2) {
-        if (backup2 === 0 || backup2 - counter <= 0) {
-          for (let i = 0; i < 30; i++) {
+        if (backup2 === 0 || backup2 - counter <= -30) {
+          for (let i = 0; i < 45; i++) {
             let blun = new Blunder(this.x);
             blunList.push(blun);
             backup2 = counter;
@@ -68,15 +69,24 @@ class Creeper{
     this.y = 10;
     this.dy = 1;
     this.health = 20;
+    this.hitW = 10;
+    this.hitH = 20;
   }
   display() {
-    image(creeperSprite, this.x, this.y);
+    if (counter % 100 < 50) {
+      image(creeperSprite1, this.x, this.y);
+    }
+    else {
+      image(creeperSprite2, this.x, this.y);
+    }
   }
   move() {
     this.y += this.dy;
   }
   collide() {
-    if (dist(this.x, this.y, Bullet.x, Bullet.y) < 2 || dist(this.x, this.y, Blunder.x, Blunder.y) < 2) {
+    let hitboxS = collidePointRect(Bullet.x, Bullet.y, this.x, this.y, this.hitW, this.hitH);
+    let hitboxB = collidePointRect(Blunder.x, Blunder.y, this.x, this.y, this.hitW, this.hitH);
+    if (hitboxS || hitboxB) {
       this.health -= 1;
     }
   }
@@ -110,7 +120,9 @@ class Dasher {
     }
   }
   collide() {
-    if (dist(this.x, this.y, Bullet.x, Bullet.y) < 2 || dist(this.x, this.y, Blunder.x, Blunder.y) < 2) {
+    let hitboxS = collidePointRect(Bullet.x, Bullet.y, this.x, this.y, this.hitW, this.hitH);
+    let hitboxB = collidePointRect(Blunder.x, Blunder.y, this.x, this.y, this.hitW, this.hitH);
+    if (hitboxS || hitboxB) {
       this.health -= 1;
     }
   }
@@ -136,11 +148,10 @@ class Bullet {
     this.y += this.dy;
   }
   collide() {
-    if (dist(this.x, this.y, Creeper.x, Creeper.y) < 2 || dist(this.x, this.y, Dasher.x, Dasher.y) < 2) {
-      shotList.pop(this);
-    }
-    if (this.y < 0) {
-      shotList.pop(this);
+    let hitboxS = collidePointRect(this.x, this.y, Creeper.x, Creeper.y, Creeper.hitW, Creeper.hitH);
+    let hitboxB = collidePointRect(this.x, this.y, Dasher.x, Dasher.y, Dasher.hitW, Dasher.hitH);
+    if (hitboxS || hitboxB) {
+      delete this;
     }
   }
 }
@@ -162,18 +173,18 @@ class Blunder {
     this.y += this.dy;
   }
   collide() {
-    if (dist(this.x, this.y, Creeper.x, Creeper.y) < 2 || dist(this.x, this.y, Dasher.x, Dasher.y) < 2) {
-      blunList.pop(this);
-    }
-    if (this.y < 0) {
-      blunList.pop(this);
+    let hitboxS = collidePointRect(this.x, this.y, Creeper.x, Creeper.y, Creeper.hitW, Creeper.hitH);
+    let hitboxB = collidePointRect(this.x, this.y, Dasher.x, Dasher.y, Dasher.hitW, Dasher.hitH);
+    if (hitboxS || hitboxB) {
+      delete this;
     }
   }
 }
 
 function preload() {
   playerSprite = loadImage("assets/Player.png");
-  creeperSprite = loadImage("assets/Creeper.png");
+  creeperSprite1 = loadImage("assets/Creeper1.png");
+  creeperSprite2 = loadImage("assets/Creeper2.png");
   dasherSprite = loadImage("assets/Dasher.png");
 }
 
@@ -195,11 +206,11 @@ function draw() {
 }
 
 function spawnEnemies() {
-  if (random(100) >= 96) {
+  if (random(100) >= 98) {
     let enc = new Creeper;
     enemyListC.push(enc);
   }
-  if (random(100) <= 1) {
+  if (random(100) <= 0.5) {
     let end = new Dasher;
     enemyListD.push(end);
   }
