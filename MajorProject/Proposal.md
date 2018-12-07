@@ -11,5 +11,5 @@ The uniqueness factor will be in the presentation and intuitiveness of the game;
 - Battle System
 - Stats
 - Items and Gear
-- One boss
 - Multiple party members
+- One boss
