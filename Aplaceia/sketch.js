@@ -8,20 +8,21 @@ let layout = 0;
 let grid;
 
 let layout0;
+let layout00;
 
 let cols;
 let rows;
 let cellSize;
+//cellSize === 24;
 
 let windowSize = 600;
 
 let groundList = [];
 let wallList = [];
 let objectList = [];
-let doorList = [];
-let npcList = [];
 
 let hero;
+let defblack;
 
 let hasBaeren = false;
 let hasMaria = false;
@@ -54,8 +55,8 @@ let letGo = true;
 
 class Player {
   constructor() {
-    this.x = 100.5;
-    this.y = 100.5;
+    this.x = 108;
+    this.y = 108;
     this.size = 24;
     this.wallUp = false;
     this.wallLeft = false;
@@ -85,10 +86,10 @@ class Player {
   detectWalls() {
     let xn = floor(this.x / cellSize);
     let yn = floor(this.y / cellSize);
-    let yu = floor((this.y - 25.5) / cellSize);
-    let xl = floor((this.x - 25.5) / cellSize);
-    let yd = floor((this.y + 25.5) / cellSize);
-    let xr = floor((this.x + 25.5) / cellSize);
+    let yu = floor((this.y - 24) / cellSize);
+    let xl = floor((this.x - 24) / cellSize);
+    let yd = floor((this.y + 24) / cellSize);
+    let xr = floor((this.x + 24) / cellSize);
 
     if (grid[yu][xn] === "1") {
       this.wallUp = true;
@@ -127,54 +128,50 @@ class Player {
     }
   }
   move() {
-    if (keyIsPressed && key === "w") {
-      if (this.wallUp === false) {
-        if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
-          this.y -= 25;
-          this.backup = this.counter;
+    if (gameState === 0) {
+      if (keyIsPressed && key === "w") {
+        if (this.wallUp === false) {
+          if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
+            this.y -= 24;
+            this.backup = this.counter;
+          }
         }
+        this.facing = "up";
       }
-      this.facing = "up";
-    }
-    if (keyIsPressed && key === "a") {
-      if (this.wallLeft === false) {
-        if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
-          this.x -= 25;
-          this.backup = this.counter;
+      if (keyIsPressed && key === "a") {
+        if (this.wallLeft === false) {
+          if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
+            this.x -= 24;
+            this.backup = this.counter;
+          }
         }
+        this.facing = "left";
       }
-      this.facing = "left";
-    }
-    if (keyIsPressed && key === "s") {
-      if (this.wallDown === false) {
-        if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
-          this.y += 25;
-          this.backup = this.counter;
+      if (keyIsPressed && key === "s") {
+        if (this.wallDown === false) {
+          if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
+            this.y += 24;
+            this.backup = this.counter;
+          }
         }
+        this.facing = "down";
       }
-      this.facing = "down";
-    }
-    if (keyIsPressed && key === "d") {
-      if (this.wallRight === false) {
-        if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
-          this.x += 25;
-          this.backup = this.counter;
+      if (keyIsPressed && key === "d") {
+        if (this.wallRight === false) {
+          if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
+            this.x += 24;
+            this.backup = this.counter;
+          }
         }
+        this.facing = "right";
       }
-      this.facing = "right";
     }
-  }
-}
-
-class NPC {
-  constructor() {
-
   }
 }
 class Ground {
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
+    this.x = x + 12;
+    this.y = y + 12;
   }
   display() {
     fill(255);
@@ -184,8 +181,8 @@ class Ground {
 }
 class Wall {
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
+    this.x = x + 12;
+    this.y = y + 12;
   }
   display() {
     fill(0);
@@ -196,6 +193,18 @@ class Wall {
 class Interactable {
   constructor() {
 
+  }
+}
+class Blackout {
+  constructor() {
+    this.pos = 300;
+    this.size = 600;
+    this.alpha = 0;
+  }
+  display() {
+    fill(0, 0, 0, this.alpha);
+    noStroke();
+    rect(this.pos, this.pos, this.size, this.size);
   }
 }
 class PartyMember {
@@ -219,14 +228,10 @@ class SpecialMove {
 
   }
 }
-class Item {
-  constructor() {
-
-  }
-}
 
 function preload() {
   layout0 = loadStrings("assets/TestGrid.txt");
+  layout00 = loadStrings("assets/TestGrid2.txt");
   fightAsset = loadImage("assets/Fight.png");
   magicAsset = loadImage("assets/Magic.png");
   defendAsset = loadImage("assets/Defend.png");
@@ -235,6 +240,8 @@ function preload() {
 
 function setup() {
   createCanvas(windowSize, windowSize);
+  background(128);
+  rectMode(CENTER);
   imageMode(CENTER);
   grid = layout0;
   rows = grid[0].length;
@@ -246,16 +253,21 @@ function setup() {
   displayGrid();
 
   hero = new Player();
+  defblack = new Blackout();
 }
 
 function draw() {
+  if (gameState === 0) {
+    bgManage();
+  }
   toggleMap();
-  bgManage();
   hero.display();
   hero.detectWalls();
   hero.cooldown();
   hero.toggleSpeed();
   hero.move();
+  defblack.display();
+  detectMapChange();
   runToggle();
 }
 
@@ -269,15 +281,15 @@ function displayGrid() {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === "0") {
-        let ground = new Ground(y * cellSize, x * cellSize);
+        let ground = new Ground(x * cellSize, y * cellSize);
         groundList.push(ground);
       }
       else if (grid[y][x] === "1") {
-        let wall = new Wall(y * cellSize, x * cellSize);
+        let wall = new Wall(x * cellSize, y * cellSize);
         wallList.push(wall);
       }
       else if (grid[y][x] === "2") {
-        let wall = new Wall(y * cellSize, x * cellSize);
+        let wall = new Wall(x * cellSize, y * cellSize);
         wallList.push(wall);
       }
     }
@@ -287,6 +299,9 @@ function displayGrid() {
 function toggleMap() {
   if (layout === 0) {
     grid = layout0;
+  }
+  else if (layout === 1) {
+    grid = layout00;
   }
 }
 
@@ -303,6 +318,37 @@ function bgManage() {
   }
 }
 
+function detectMapChange() {
+  if (layout === 0) {
+    if (hero.x === 588 && hero.y === 492) {
+      gameState = -1;
+      transition(36, 492, 1);
+    }
+  }
+  if (layout === 1) {
+    if (hero.x === 12 && hero.y === 492) {
+      gameState = -1;
+      transition(564, 492, 0);
+    }
+  }
+}
+
+function transition(newx, newy, layoutTo) {
+  for (let i = 0; i < 255; i++) {
+    defblack.alpha += 1;
+  }
+  layout = layoutTo;
+  deleteLists();
+  cleanupGrid();
+  displayGrid();
+  hero.x = newx;
+  hero.y = newy;
+  for (let i = 0; i < 255; i++) {
+    defblack.alpha -= 1;
+  }
+  gameState = 0;
+}
+
 function runToggle() {
   if (keyIsPressed && key === "e" && isRun === false && letGo === true) {
     isRun = true;
@@ -314,5 +360,17 @@ function runToggle() {
   }
   if (!keyIsPressed) {
     letGo = true;
+  }
+}
+
+function deleteLists() {
+  for (let i = groundList.length - 1; i > 0; i--) {
+    groundList[i].pop;
+  }
+  for (let i = wallList.length - 1; i > 0; i--) {
+    wallList[i].pop;
+  }
+  for (let i = objectList.length - 1; i > 0; i--) {
+    objectList[i].pop;
   }
 }
