@@ -2,7 +2,8 @@
 //Initiated December 7, 2018
 //Callan Fehr
 
-let gameState = 0;
+let gameState;
+let textState = 0;
 let layout = 0;
 
 let grid;
@@ -50,6 +51,9 @@ let magicAsset;
 let defendAsset;
 let fleeAsset;
 
+let textBoxAsset;
+let textLetGo;
+
 let isRun = false;
 let letGo = true;
 
@@ -62,8 +66,12 @@ class Player {
     this.size = 24;
     this.wallUp = false;
     this.wallLeft = false;
-    this.wallRight = false;
     this.wallDown = false;
+    this.wallRight = false;
+    this.objUp = false;
+    this.objLeft = false;
+    this.objDown = false;
+    this.objRight = false;
     this.facing = "down";
     this.counter = 0;
     this.backup = 0;
@@ -93,29 +101,53 @@ class Player {
     let yd = floor((this.y + 24) / cellSize);
     let xr = floor((this.x + 24) / cellSize);
 
-    if (grid[yu][xn] === "1") {
+    if (grid[yu][xn] === "1" || grid[yu][xn] === "2") {
       this.wallUp = true;
     }
     else {
       this.wallUp = false;
     }
-    if (grid[yn][xl] === "1") {
+    if (grid[yn][xl] === "1" || grid[yn][xl] === "2") {
       this.wallLeft = true;
     }
     else {
       this.wallLeft = false;
     }
-    if (grid[yd][xn] === "1") {
+    if (grid[yd][xn] === "1" || grid[yd][xn] === "2") {
       this.wallDown = true;
     }
     else {
       this.wallDown = false;
     }
-    if (grid[yn][xr] === "1") {
+    if (grid[yn][xr] === "1" || grid[yn][xr] === "2") {
       this.wallRight = true;
     }
     else {
       this.wallRight = false;
+    }
+    if (grid[yu][xn] === "2") {
+      this.objUp = true;
+    }
+    else {
+      this.objUp = false;
+    }
+    if (grid[yn][xl] === "2") {
+      this.objLeft = true;
+    }
+    else {
+      this.objLeft = false;
+    }
+    if (grid[yd][xn] === "2") {
+      this.objDown = true;
+    }
+    else {
+      this.objDown = false;
+    }
+    if (grid[yn][xr] === "2") {
+      this.objRight = true;
+    }
+    else {
+      this.objRight = false;
     }
   }
   cooldown() {
@@ -192,21 +224,15 @@ class Wall {
     rect(this.x, this.y, cellSize, cellSize);
   }
 }
-class Interactable {
-  constructor() {
-
-  }
-}
-class Blackout {
-  constructor() {
-    this.pos = 300;
-    this.size = 600;
-    this.alpha = 0;
+class Objt {
+  constructor(x, y) {
+    this.x = x + 12;
+    this.y = y + 12;
   }
   display() {
-    fill(0, 0, 0, this.alpha);
+    fill(240, 0, 0);
     noStroke();
-    rect(this.pos, this.pos, this.size, this.size);
+    rect(this.x, this.y, cellSize, cellSize);
   }
 }
 class PartyMember {
@@ -238,6 +264,7 @@ function preload() {
   magicAsset = loadImage("assets/Magic.png");
   defendAsset = loadImage("assets/Defend.png");
   fleeAsset = loadImage("assets/Flee.png");
+  textBoxAsset = loadImage("assets/Textbox.png");
 }
 
 function setup() {
@@ -255,29 +282,36 @@ function setup() {
   displayGrid();
 
   hero = new Player();
-  defblack = new Blackout();
+
+  gameState = 0;
+  textState = 0;
 }
 
 function draw() {
   if (gameState === 0) {
     bgManage();
   }
-  toggleMap();
   hero.display();
   hero.detectWalls();
   hero.cooldown();
   hero.toggleSpeed();
   hero.move();
-  defblack.display();
   detectMapChange();
+  detectText();
+  regulateText();
   runToggle();
 }
 
 function cleanupGrid() {
-  for (let i = 0; i < grid.length; i++) {
-    // console.log(grid.length, grid[i], typeof(grid[i]), i);
-    grid[i] = grid[i].split("");
+  for (let i = 0; i < 2; i++) {
+    layout = i;
+    toggleMap();
+    for (let j = 0; j < grid.length; j++) {
+      grid[j] = grid[j].split("");
+    }
   }
+  layout = 0;
+  toggleMap();
 }
 
 function displayGrid() {
@@ -292,8 +326,8 @@ function displayGrid() {
         wallList.push(wall);
       }
       else if (grid[y][x] === "2") {
-        let wall = new Wall(x * cellSize, y * cellSize);
-        wallList.push(wall);
+        let obj = new Objt(x * cellSize, y * cellSize);
+        objectList.push(obj);
       }
     }
   }
@@ -310,13 +344,18 @@ function toggleMap() {
 
 function bgManage() {
   for (let i = 0; i < groundList.length - 1; i++) {
-    if (gameState === 0) {
+    if (gameState === 0 || gameState === -1) {
       groundList[i].display();
     }
   }
   for (let i = 0; i < wallList.length - 1; i++) {
-    if (gameState === 0) {
+    if (gameState === 0 || gameState === -1) {
       wallList[i].display();
+    }
+  }
+  for (let i = 0; i < objectList.length - 1; i++) {
+    if (gameState === 0 || gameState === -1) {
+      objectList[i].display();
     }
   }
 }
@@ -324,31 +363,73 @@ function bgManage() {
 function detectMapChange() {
   if (layout === 0) {
     if (hero.x === 588 && hero.y === 492) {
-      gameState = -1;
+      gameState = -3;
       transition(36, 492, 1);
     }
   }
   if (layout === 1) {
     if (hero.x === 12 && hero.y === 492) {
-      gameState = -1;
+      gameState = -3;
       transition(564, 492, 0);
     }
   }
 }
 
-function transition(newx, newy, layoutTo) {
-  for (let i = 0; i < 255; i++) {
-    defblack.alpha += 1;
+function detectText() {
+  if (gameState === 0) {
+    if (keyIsPressed && key === "o") {
+      textLetGo = false;
+      if (hero.objUp === true && hero.facing === "up" || hero.objLeft === true && hero.facing === "left" || hero.objDown === true && hero.facing === "down" || hero.objRight === true && hero.facing === "right") {
+        if (layout === 1) {
+          gameState = -1;
+          activateText(0);
+          textState += 1;
+        }
+      }
+    }
+    else if (!keyIsPressed || keyIsPressed && key !== "o") {
+      textLetGo = true;
+    }
   }
+}
 
-  layout = layoutTo;
+function  regulateText() {
+  if (gameState === -1) {
+    if (keyIsPressed && key === "o") {
+      if (textLetGo === true) {
+        textState += 1;
+      }
+    }
+  }
+  else {
+    textState = 0;
+  }
+}
+
+function activateText(id) {
+  if (id === 0) {
+    if (textState === 1) {
+      displayText("This is a blessed mess of the best text test.");
+    }
+    else {
+      gameState = 0;
+    }
+  }
+}
+
+function displayText(assignedText) {
+  image(textBoxAsset, 0, 350);
+  textSize(32);
+  text(assignedText, 300, 425);
+}
+
+function transition(newx, newy, layoutTo) {
   deleteLists();
+  layout = layoutTo;
+  toggleMap();
   displayGrid();
   hero.x = newx;
   hero.y = newy;
-  for (let i = 0; i < 255; i++) {
-    defblack.alpha -= 1;
-  }
   gameState = 0;
 }
 
@@ -364,19 +445,13 @@ function runToggle() {
   if (!keyIsPressed) {
     letGo = true;
   }
+  //THIS IS HOW YOU SOLVE THE PROBLEM DO NOT FORGET TO LOOK AT THIS
+  //You have to figure out if it's just doing it for a slight amount of time
+  //console.log(gameState);
 }
 
 function deleteLists() {
-  // for (let i = grid.length - 1; i > 0; i--) {
-  //   grid[i].pop();
-  // }
-  for (let i = groundList.length - 1; i > 0; i--) {
-    groundList.pop(i);
-  }
-  for (let i = wallList.length - 1; i > 0; i--) {
-    wallList.pop(i);
-  }
-  for (let i = objectList.length - 1; i > 0; i--) {
-    objectList.pop(i);
-  }
+  groundList = [];
+  wallList = [];
+  objectList = [];
 }
