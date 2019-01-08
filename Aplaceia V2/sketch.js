@@ -5,6 +5,9 @@
 let gameState;
 let textState = 0;
 let layout = 0;
+let scriptState = 1;
+let gameCounter = 0;
+let backup = 0;
 
 let grid;
 
@@ -23,7 +26,7 @@ let wallList = [];
 let objectList = [];
 
 let hero;
-let defblack;
+let pitch;
 
 let hasBaeren = false;
 let hasMaria = false;
@@ -52,7 +55,10 @@ let defendAsset;
 let fleeAsset;
 
 let textBoxAsset;
-let textLetGo;
+let textLetGo = true;
+let isText;
+let textList = [];
+let breakCount;
 
 let isRun = false;
 let letGo = true;
@@ -257,6 +263,18 @@ class SpecialMove {
   }
 }
 
+class Blackout {
+  constructor() {
+    this.location = windowSize / 2;
+    this.size = windowSize;
+    this.alphaNum = 255;
+  }
+  display() {
+    fill(0, 0, 0, this.alphaNum);
+    rect(this.location, this.location, windowSize, windowSize);
+  }
+}
+
 function preload() {
   layout0 = loadStrings("assets/TestGrid.txt");
   layout00 = loadStrings("assets/TestGrid2.txt");
@@ -279,27 +297,32 @@ function setup() {
   cellSize = windowSize / rows;
 
   cleanupGrid();
-  displayGrid();
+  readyGrid();
 
   hero = new Player();
+  pitch = new Blackout();
 
-  gameState = 0;
+  gameState = -2;
   textState = 0;
 }
 
 function draw() {
+  counterUp();
+  scriptManage();
   if (gameState === 0) {
     bgManage();
+    hero.display();
+    hero.detectWalls();
+    hero.cooldown();
+    hero.toggleSpeed();
+    hero.move();
   }
-  hero.display();
-  hero.detectWalls();
-  hero.cooldown();
-  hero.toggleSpeed();
-  hero.move();
   detectMapChange();
-  detectText();
-  regulateText();
   runToggle();
+}
+
+function counterUp() {
+  gameCounter += 1;
 }
 
 function cleanupGrid() {
@@ -314,7 +337,26 @@ function cleanupGrid() {
   toggleMap();
 }
 
-function displayGrid() {
+function scriptManage() {
+  if (scriptState === 1) {
+    gameState = -2;
+    pitch.display();
+    if (gameCounter >= 100) {
+      activateText(0, "...My head still hurts...|Oof.", 1);
+    }
+  }
+  else if (scriptState === 2) {
+    pitch.display();
+    for (let i = 0; i < 255; i++) {
+      backup = gameCounter;
+      if (gameCounter - backup === 2) {
+        pitch.alphaNum -= 1;
+      }
+    }
+  }
+}
+
+function readyGrid() {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === "0") {
@@ -375,79 +417,127 @@ function detectMapChange() {
   }
 }
 
-function detectText() {
-  if (gameState === 0) {
-    if (keyIsPressed && key === "o") {
-      textLetGo = false;
-      if (hero.objUp === true && hero.facing === "up" || hero.objLeft === true && hero.facing === "left" || hero.objDown === true && hero.facing === "down" || hero.objRight === true && hero.facing === "right") {
-        if (layout === 1) {
-          gameState = -1;
-          activateText(0);
-          textState += 1;
-        }
-      }
-    }
-    else if (!keyIsPressed || keyIsPressed && key !== "o") {
-      textLetGo = true;
-    }
-  }
-}
-
-function  regulateText() {
-  if (gameState === -1) {
-    if (keyIsPressed && key === "o") {
+function keyPressed() {
+  if (key === "o") {
+    if (gameState === -1) {
       if (textLetGo === true) {
         textState += 1;
       }
     }
-  }
-  else {
-    textState = 0;
+    if (gameState === 0) {
+      if (hero.objUp === true && hero.facing === "up" || hero.objLeft === true && hero.facing === "left" || hero.objDown === true && hero.facing === "down" || hero.objRight === true && hero.facing === "right") {
+        if (layout === 1) {
+          if (textLetGo === true) {
+            textState = 1;
+            textLetGo = false;
+            activateText(0, "This text is a blessed mess of the best text test.");
+          }
+        }
+      }
+    }
+    textLetGo = false;
   }
 }
 
-function activateText(id) {
-  if (id === 0) {
-    if (textState === 1) {
-      displayText("This is a blessed mess of the best text test.");
+function keyReleased() {
+  if (key === "o") {
+    textLetGo = true;
+  }
+}
+
+function activateText(speaker, textID, promptID) {
+  gameState = -1;
+  textList = [];
+  breakCount = 0;
+  divideText(textID);
+  if (breakCount === 0) {
+    if (textState <= breakCount) {
+      if (speaker === 0) {
+        image(textBoxAsset, 300, 500, 550, 150);
+        fill(255);
+        textSize(24);
+        text(textID, 250, 500, 410, 115);
+      }
+      else {
+        image(textBoxAsset, 300, 500, 550, 150);
+        fill(255);
+        textSize(24);
+        text(textID, 400, 500, 410, 115);
+      }
     }
     else {
-      gameState = 0;
+      if (promptID === 1) {
+        scriptState = 2;
+      }
+    }
+  }
+  else {
+    if (textState <= breakCount) {
+      if (speaker === 0) {
+        let newText = split(textID, "|");
+        image(textBoxAsset, 300, 500, 550, 150);
+        fill(255);
+        textSize(24);
+        text(newText[textState], 250, 500, 410, 115);
+      }
+      else {
+        let newText = split(textID, "|");
+        image(textBoxAsset, 300, 500, 550, 150);
+        fill(255);
+        textSize(24);
+        text(newText[textState], 400, 500, 410, 115);
+      }
+    }
+    else {
+      if (promptID === 1) {
+        scriptState = 2;
+      }
+      else {
+        gameState = 0;
+      }
     }
   }
 }
 
-function displayText(assignedText) {
-  image(textBoxAsset, 0, 350);
-  textSize(32);
-  text(assignedText, 300, 425);
+// if (keyIsPressed && key === "o") {
+//   if (textLetGo === true) {
+//     textState += 1;
+//     textLetGo = false;
+//   }
+// }
+
+function divideText(textID) {
+  for (let i = 0; i < textID.length; i++) {
+    if (textID[i] === "|") {
+      breakCount += 1;
+    }
+  }
 }
 
 function transition(newx, newy, layoutTo) {
   deleteLists();
   layout = layoutTo;
   toggleMap();
-  displayGrid();
+  readyGrid();
   hero.x = newx;
   hero.y = newy;
   gameState = 0;
 }
 
 function runToggle() {
-  if (keyIsPressed && key === "e" && isRun === false && letGo === true) {
-    isRun = true;
-    letGo = false;
+  if (gameState === 0) {
+    if (keyIsPressed && key === "e" && isRun === false && letGo === true) {
+      isRun = true;
+      letGo = false;
+    }
+    if (keyIsPressed && key === "e" && isRun === true && letGo === true) {
+      isRun = false;
+      letGo = false;
+    }
+    if (!keyIsPressed) {
+      letGo = true;
+    }
   }
-  if (keyIsPressed && key === "e" && isRun === true && letGo === true) {
-    isRun = false;
-    letGo = false;
-  }
-  if (!keyIsPressed) {
-    letGo = true;
-  }
-  //THIS IS HOW YOU SOLVE THE PROBLEM DO NOT FORGET TO LOOK AT THIS
-  //You have to figure out if it's just doing it for a slight amount of time
-  //console.log(gameState);
 }
 
 function deleteLists() {
