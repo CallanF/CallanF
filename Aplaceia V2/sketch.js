@@ -4,15 +4,16 @@
 
 let gameState;
 let textState = 0;
-let layout = 0;
-let scriptState = 1;
+let layout = 1;
+let scriptState = 0;
 let gameCounter = 0;
-let backup = 0;
+let increase = true;
 
 let grid;
 
 let layout0;
 let layout00;
+let cellLayout;
 
 let cols;
 let rows;
@@ -27,6 +28,8 @@ let objectList = [];
 
 let hero;
 let pitch;
+
+let titleScreenAsset;
 
 let hasBaeren = false;
 let hasMaria = false;
@@ -49,11 +52,6 @@ let cryceAssetL;
 let cryceAssetD;
 let cryceAssetR;
 
-let fightAsset;
-let magicAsset;
-let defendAsset;
-let fleeAsset;
-
 let textBoxAsset;
 let textLetGo = true;
 let isText;
@@ -67,8 +65,15 @@ class Player {
   constructor() {
     // this.x = 108;
     // this.y = 108;
-    this.x = 540;
-    this.y = 492;
+
+    // this.x = 540;
+    // this.y = 492;
+
+    //7 Right
+    //10 Down
+
+    this.x = 156;
+    this.y = 228;
     this.size = 24;
     this.wallUp = false;
     this.wallLeft = false;
@@ -271,6 +276,7 @@ class Blackout {
   }
   display() {
     fill(0, 0, 0, this.alphaNum);
+    stroke(0, 0, 0, this.alphaNum);
     rect(this.location, this.location, windowSize, windowSize);
   }
 }
@@ -278,10 +284,8 @@ class Blackout {
 function preload() {
   layout0 = loadStrings("assets/TestGrid.txt");
   layout00 = loadStrings("assets/TestGrid2.txt");
-  fightAsset = loadImage("assets/Fight.png");
-  magicAsset = loadImage("assets/Magic.png");
-  defendAsset = loadImage("assets/Defend.png");
-  fleeAsset = loadImage("assets/Flee.png");
+  cellLayout = loadStrings("assets/PrisonCell.txt");
+  titleScreenAsset = loadImage("assets/Title Screen.png");
   textBoxAsset = loadImage("assets/Textbox.png");
 }
 
@@ -290,25 +294,33 @@ function setup() {
   background(128);
   rectMode(CENTER);
   imageMode(CENTER);
-  grid = layout0;
+
+  grid = cellLayout;
   rows = grid[0].length;
   cols = grid[0].length;
-
   cellSize = windowSize / rows;
 
+  toggleMap();
   cleanupGrid();
   readyGrid();
 
   hero = new Player();
   pitch = new Blackout();
 
-  gameState = -2;
+  gameState = -3;
   textState = 0;
 }
 
 function draw() {
-  counterUp();
-  scriptManage();
+  console.log(gameCounter);
+  if (gameState === -3) {
+    titleScreen();
+  }
+  else {
+    counterUp();
+  }
+  scriptManage1();
+  scriptManage2();
   if (gameState === 0) {
     bgManage();
     hero.display();
@@ -321,8 +333,21 @@ function draw() {
   runToggle();
 }
 
+function titleScreen() {
+  pitch.display();
+  image(titleScreenAsset, 300, 200);
+  if (keyIsPressed) {
+    scriptState = 1;
+  }
+}
+
 function counterUp() {
-  gameCounter += 1;
+  if (increase === true) {
+    gameCounter += 1;
+  }
+  else if (increase === false) {
+    gameCounter = 0;
+  }
 }
 
 function cleanupGrid() {
@@ -333,25 +358,29 @@ function cleanupGrid() {
       grid[j] = grid[j].split("");
     }
   }
-  layout = 0;
+  layout = 1;
   toggleMap();
 }
 
-function scriptManage() {
+function scriptManage1() {
   if (scriptState === 1) {
     gameState = -2;
     pitch.display();
     if (gameCounter >= 100) {
-      activateText(0, "...My head still hurts...|Oof.", 1);
+      activateText(0, "...My head still hurts...|Oof...", 1);
     }
   }
-  else if (scriptState === 2) {
+}
+
+function scriptManage2() {
+  if (scriptState === 2) {
+    bgManage();
+    hero.display();
     pitch.display();
-    for (let i = 0; i < 255; i++) {
-      backup = gameCounter;
-      if (gameCounter - backup === 2) {
-        pitch.alphaNum -= 1;
-      }
+    increase = true;
+    if (gameCounter >= 100) {
+      increase = false;
+      pitch.alphaNum -= 255;
     }
   }
 }
@@ -379,8 +408,11 @@ function toggleMap() {
   if (layout === 0) {
     grid = layout0;
   }
-  else if (layout === 1) {
+  else if (layout === -1) {
     grid = layout00;
+  }
+  if (layout === 1) {
+    grid = cellLayout;
   }
 }
 
@@ -406,7 +438,7 @@ function detectMapChange() {
   if (layout === 0) {
     if (hero.x === 588 && hero.y === 492) {
       gameState = -3;
-      transition(36, 492, 1);
+      transition(36, 492, -1);
     }
   }
   if (layout === 1) {
@@ -414,34 +446,6 @@ function detectMapChange() {
       gameState = -3;
       transition(564, 492, 0);
     }
-  }
-}
-
-function keyPressed() {
-  if (key === "o") {
-    if (gameState === -1) {
-      if (textLetGo === true) {
-        textState += 1;
-      }
-    }
-    if (gameState === 0) {
-      if (hero.objUp === true && hero.facing === "up" || hero.objLeft === true && hero.facing === "left" || hero.objDown === true && hero.facing === "down" || hero.objRight === true && hero.facing === "right") {
-        if (layout === 1) {
-          if (textLetGo === true) {
-            textState = 1;
-            textLetGo = false;
-            activateText(0, "This text is a blessed mess of the best text test.");
-          }
-        }
-      }
-    }
-    textLetGo = false;
-  }
-}
-
-function keyReleased() {
-  if (key === "o") {
-    textLetGo = true;
   }
 }
 
@@ -465,11 +469,6 @@ function activateText(speaker, textID, promptID) {
         text(textID, 400, 500, 410, 115);
       }
     }
-    else {
-      if (promptID === 1) {
-        scriptState = 2;
-      }
-    }
   }
   else {
     if (textState <= breakCount) {
@@ -490,6 +489,7 @@ function activateText(speaker, textID, promptID) {
     }
     else {
       if (promptID === 1) {
+        increase = false;
         scriptState = 2;
       }
       else {
@@ -544,4 +544,20 @@ function deleteLists() {
   groundList = [];
   wallList = [];
   objectList = [];
+}
+
+function keyPressed() {
+  if (keyCode === 79) {
+    if (gameState === -1) {
+      textState += 1;
+    }
+    if (gameState === 0) {
+      if (hero.objUp === true && hero.facing === "up" || hero.objLeft === true && hero.facing === "left" || hero.objDown === true && hero.facing === "down" || hero.objRight === true && hero.facing === "right") {
+        if (layout === 1) {
+          textState = 1;
+          activateText(0, "This text is a blessed mess of the best text test.");
+        }
+      }
+    }
+  }
 }
