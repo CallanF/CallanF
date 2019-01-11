@@ -2,6 +2,8 @@
 //Initiated December 7, 2018
 //Callan Fehr
 
+let testing = true;
+
 let gameState;
 let textState = 0;
 let layout = 1;
@@ -9,6 +11,7 @@ let scriptState = 0;
 let gameCounter = 0;
 let increase = true;
 
+let tester;
 let grid;
 
 let layout0;
@@ -28,6 +31,7 @@ let objectList = [];
 
 let hero;
 let pitch;
+let sergeant;
 
 let titleScreenAsset;
 
@@ -61,6 +65,146 @@ let breakCount;
 let isRun = false;
 let letGo = true;
 
+class Test { //----------------------------------------------------------------]
+  constructor() {
+    // this.x = 108;
+    // this.y = 108;
+
+    // this.x = 540;
+    // this.y = 492;
+
+    //7 Right
+    //10 Down
+
+    this.x = 156;
+    this.y = 228;
+    this.size = 24;
+    this.wallUp = false;
+    this.wallLeft = false;
+    this.wallDown = false;
+    this.wallRight = false;
+    this.objUp = false;
+    this.objLeft = false;
+    this.objDown = false;
+    this.objRight = false;
+    this.facing = "down";
+    this.counter = 0;
+    this.backup = 0;
+    this.walkspeed;
+  }
+  display() {
+    fill(255, 0, 0);
+    noStroke();
+    rect(this.x, this.y, this.size, this.size);
+  }
+  detectWalls() {
+    let xn = floor(this.x / cellSize);
+    let yn = floor(this.y / cellSize);
+    let yu = floor((this.y - 24) / cellSize);
+    let xl = floor((this.x - 24) / cellSize);
+    let yd = floor((this.y + 24) / cellSize);
+    let xr = floor((this.x + 24) / cellSize);
+
+    if (grid[yu][xn] === "1" || grid[yu][xn] === "2") {
+      this.wallUp = true;
+    }
+    else {
+      this.wallUp = false;
+    }
+    if (grid[yn][xl] === "1" || grid[yn][xl] === "2") {
+      this.wallLeft = true;
+    }
+    else {
+      this.wallLeft = false;
+    }
+    if (grid[yd][xn] === "1" || grid[yd][xn] === "2") {
+      this.wallDown = true;
+    }
+    else {
+      this.wallDown = false;
+    }
+    if (grid[yn][xr] === "1" || grid[yn][xr] === "2") {
+      this.wallRight = true;
+    }
+    else {
+      this.wallRight = false;
+    }
+    if (grid[yu][xn] === "2") {
+      this.objUp = true;
+    }
+    else {
+      this.objUp = false;
+    }
+    if (grid[yn][xl] === "2") {
+      this.objLeft = true;
+    }
+    else {
+      this.objLeft = false;
+    }
+    if (grid[yd][xn] === "2") {
+      this.objDown = true;
+    }
+    else {
+      this.objDown = false;
+    }
+    if (grid[yn][xr] === "2") {
+      this.objRight = true;
+    }
+    else {
+      this.objRight = false;
+    }
+  }
+  cooldown() {
+    this.counter += 1;
+  }
+  toggleSpeed() {
+    if (isRun === true) {
+      this.walkspeed = -6;
+    }
+    if (isRun === false) {
+      this.walkspeed = -20;
+    }
+  }
+  move() {
+    if (keyIsPressed && key === "w") {
+      if (this.wallUp === false) {
+        if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
+          this.y -= 24;
+          this.backup = this.counter;
+        }
+      }
+      this.facing = "up";
+    }
+    if (keyIsPressed && key === "a") {
+      if (this.wallLeft === false) {
+        if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
+          this.x -= 24;
+          this.backup = this.counter;
+        }
+      }
+      this.facing = "left";
+    }
+    if (keyIsPressed && key === "s") {
+      if (this.wallDown === false) {
+        if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
+          this.y += 24;
+          this.backup = this.counter;
+        }
+      }
+      this.facing = "down";
+    }
+    if (keyIsPressed && key === "d") {
+      if (this.wallRight === false) {
+        if (this.backup === 0 || this.backup - this.counter <= this.walkspeed) {
+          this.x += 24;
+          this.backup = this.counter;
+        }
+      }
+      this.facing = "right";
+    }
+  }
+}
+
 class Player {
   constructor() {
     // this.x = 108;
@@ -89,18 +233,19 @@ class Player {
     this.walkspeed;
   }
   display() {
-    if (this.facing === "up") {
-      fill(255, 255, 0);
-    }
-    else if (this.facing === "left") {
-      fill(0, 255, 0);
-    }
-    else if (this.facing === "down") {
-      fill(0, 0, 255);
-    }
-    else if (this.facing === "right") {
-      fill(255, 0, 0);
-    }
+    // if (this.facing === "up") {
+    //   fill(255, 255, 0);
+    // }
+    // else if (this.facing === "left") {
+    //   fill(0, 255, 0);
+    // }
+    // else if (this.facing === "down") {
+    //   fill(0, 0, 255);
+    // }
+    // else if (this.facing === "right") {
+    //   fill(255, 0, 0);
+    // }
+    fill(0, 0, 255);
     noStroke();
     rect(this.x, this.y, this.size, this.size);
   }
@@ -246,6 +391,17 @@ class Objt {
     rect(this.x, this.y, cellSize, cellSize);
   }
 }
+class NPC {
+  constructor(x, y) {
+    this.x = x + 12;
+    this.y = y + 12;
+  }
+  display() {
+    fill(128, 128, 0);
+    noStroke();
+    rect(this.x, this.y, cellSize, cellSize);
+  }
+}
 class PartyMember {
   constructor(h, m, o, d, a, e, l, id) {
     this.health = h;
@@ -281,7 +437,7 @@ class Blackout {
   }
 }
 
-function preload() {
+function preload() { //--------------------------------------------------------]
   layout0 = loadStrings("assets/TestGrid.txt");
   layout00 = loadStrings("assets/TestGrid2.txt");
   cellLayout = loadStrings("assets/PrisonCell.txt");
@@ -289,7 +445,7 @@ function preload() {
   textBoxAsset = loadImage("assets/Textbox.png");
 }
 
-function setup() {
+function setup() { //----------------------------------------------------------]
   createCanvas(windowSize, windowSize);
   background(128);
   rectMode(CENTER);
@@ -312,15 +468,20 @@ function setup() {
 }
 
 function draw() {
-  console.log(gameCounter);
+  if (testing === true) {
+    tester.display();
+    tester.detectWalls();
+    tester.cooldown();
+    tester.toggleSpeed();
+    tester.move();
+  }
   if (gameState === -3) {
     titleScreen();
   }
   else {
     counterUp();
   }
-  scriptManage1();
-  scriptManage2();
+  scriptManage();
   if (gameState === 0) {
     bgManage();
     hero.display();
@@ -345,9 +506,10 @@ function counterUp() {
   if (increase === true) {
     gameCounter += 1;
   }
-  else if (increase === false) {
-    gameCounter = 0;
-  }
+}
+
+function resetCounter() {
+  gameCounter = 0;
 }
 
 function cleanupGrid() {
@@ -362,7 +524,7 @@ function cleanupGrid() {
   toggleMap();
 }
 
-function scriptManage1() {
+function scriptManage() {
   if (scriptState === 1) {
     gameState = -2;
     pitch.display();
@@ -370,17 +532,26 @@ function scriptManage1() {
       activateText(0, "...My head still hurts...|Oof...", 1);
     }
   }
-}
-
-function scriptManage2() {
   if (scriptState === 2) {
+    gameState = -2;
     bgManage();
     hero.display();
     pitch.display();
     increase = true;
     if (gameCounter >= 100) {
-      increase = false;
       pitch.alphaNum -= 255;
+      resetCounter();
+      scriptState = 3;
+    }
+  }
+  if (scriptState === 3) {
+    bgManage();
+    hero.display();
+    increase = true;
+    if (gameCounter >= 50) {
+      grid[12][13] = 0;
+      sergeant = new NPC();
+      sergeant.display();
     }
   }
 }
@@ -418,17 +589,17 @@ function toggleMap() {
 
 function bgManage() {
   for (let i = 0; i < groundList.length - 1; i++) {
-    if (gameState === 0 || gameState === -1) {
+    if (gameState === 0 || gameState === -1 || scriptState === 2 || scriptState === 3) {
       groundList[i].display();
     }
   }
   for (let i = 0; i < wallList.length - 1; i++) {
-    if (gameState === 0 || gameState === -1) {
+    if (gameState === 0 || gameState === -1 || scriptState === 2 || scriptState === 3) {
       wallList[i].display();
     }
   }
   for (let i = 0; i < objectList.length - 1; i++) {
-    if (gameState === 0 || gameState === -1) {
+    if (gameState === 0 || gameState === -1 || scriptState === 2 || scriptState === 3) {
       objectList[i].display();
     }
   }
@@ -490,6 +661,7 @@ function activateText(speaker, textID, promptID) {
     else {
       if (promptID === 1) {
         increase = false;
+        resetCounter();
         scriptState = 2;
       }
       else {
