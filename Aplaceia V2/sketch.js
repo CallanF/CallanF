@@ -2,7 +2,7 @@
 //Initiated December 7, 2018
 //Callan Fehr
 
-let testing = true;
+let testing = false;
 
 let gameState;
 let textState = 0;
@@ -35,37 +35,33 @@ let sergeant;
 
 let titleScreenAsset;
 
-let hasBaeren = false;
-let hasMaria = false;
-let hasCryce = false;
-
-let naomiAssetU;
-let naomiAssetL;
-let naomiAssetD;
-let naomiAssetR;
-let baerenAssetU;
-let baerenAssetL;
-let baerenAssetD;
-let baerenAssetR;
-let mariaAssetU;
-let mariaAssetL;
-let mariaAssetD;
-let mariaAssetR;
-let cryceAssetU;
-let cryceAssetL;
-let cryceAssetD;
-let cryceAssetR;
+// let naomiAssetU;
+// let naomiAssetL;
+// let naomiAssetD;
+// let naomiAssetR;
+// let baerenAssetU;
+// let baerenAssetL;
+// let baerenAssetD;
+// let baerenAssetR;
+// let mariaAssetU;
+// let mariaAssetL;
+// let mariaAssetD;
+// let mariaAssetR;
+// let cryceAssetU;
+// let cryceAssetL;
+// let cryceAssetD;
+// let cryceAssetR;
 
 let textBoxAsset;
+let textBoxAssetYellow;
 let textLetGo = true;
-let isText;
 let textList = [];
 let breakCount;
 
 let isRun = false;
 let letGo = true;
 
-class Test { //----------------------------------------------------------------]
+class Test { //----------------------------------------------------------------}
   constructor() {
     // this.x = 108;
     // this.y = 108;
@@ -95,7 +91,9 @@ class Test { //----------------------------------------------------------------]
   display() {
     fill(255, 0, 0);
     noStroke();
+    rectMode(CENTER);
     rect(this.x, this.y, this.size, this.size);
+    rectMode(CORNER);
   }
   detectWalls() {
     let xn = floor(this.x / cellSize);
@@ -403,15 +401,20 @@ class NPC {
   }
 }
 class PartyMember {
-  constructor(h, m, o, d, a, e, l, id) {
+  constructor(h, m, o, d, i, a, l, id) {
     this.health = h;
     this.magic = m;
     this.offence = o;
     this.defence = d;
+    this.initiative = i;
     this.agility = a;
-    this.evade = e;
     this.luck = l;
   }
+  // fighterSetup() {
+  //   if (id === 1) {
+  //
+  //   }
+  // }
 }
 class Enemy {
   constructor() {
@@ -437,15 +440,16 @@ class Blackout {
   }
 }
 
-function preload() { //--------------------------------------------------------]
+function preload() { //--------------------------------------------------------}
   layout0 = loadStrings("assets/TestGrid.txt");
   layout00 = loadStrings("assets/TestGrid2.txt");
   cellLayout = loadStrings("assets/PrisonCell.txt");
   titleScreenAsset = loadImage("assets/Title Screen.png");
   textBoxAsset = loadImage("assets/Textbox.png");
+  textBoxAssetYellow = loadImage("assets/TextboxYellow.png");
 }
 
-function setup() { //----------------------------------------------------------]
+function setup() { //----------------------------------------------------------}
   createCanvas(windowSize, windowSize);
   background(128);
   rectMode(CENTER);
@@ -462,19 +466,14 @@ function setup() { //----------------------------------------------------------]
 
   hero = new Player();
   pitch = new Blackout();
+  tester = new Test();
 
   gameState = -3;
   textState = 0;
 }
 
-function draw() {
-  if (testing === true) {
-    tester.display();
-    tester.detectWalls();
-    tester.cooldown();
-    tester.toggleSpeed();
-    tester.move();
-  }
+function draw() { //-----------------------------------------------------------}
+  revertText();
   if (gameState === -3) {
     titleScreen();
   }
@@ -492,6 +491,13 @@ function draw() {
   }
   detectMapChange();
   runToggle();
+  if (testing === true) {
+    tester.display();
+    tester.detectWalls();
+    tester.cooldown();
+    tester.toggleSpeed();
+    tester.move();
+  }
 }
 
 function titleScreen() {
@@ -550,9 +556,54 @@ function scriptManage() {
     increase = true;
     if (gameCounter >= 50) {
       grid[12][13] = 0;
-      sergeant = new NPC();
+      sergeant = new NPC(288, 384);
       sergeant.display();
+      if (gameCounter >= 60) {
+        sergeant.y -= 24;
+        bgManage();
+        hero.display();
+        sergeant.display();
+        if (gameCounter >= 70) {
+          sergeant.y -= 24;
+          bgManage();
+          hero.display();
+          sergeant.display();
+          scriptState = 4;
+        }
+      }
     }
+  }
+  if (scriptState === 4) {
+    increase = false;
+    resetCounter();
+    activateText(0, "Get up. The captain wants to see you.", 2);
+  }
+  if (scriptState === 5) {
+    gameState = -2;
+    if (gameCounter >= 70) {
+      activateText(0, "...No. I'm tired.|I'll see your captain when I'm rested.", 3);
+    }
+  }
+  if (scriptState === 6) {
+    gameState = -2;
+    activateText(0, "You don't have much of a choice here.|You're a captive on OUR ship.", 4);
+  }
+  if (scriptState === 7) {
+    gameState = -2;
+    let discard = true;
+    if (discard === true) {
+      hero.y += 24;
+      if (gameCounter >= 50) {
+        scriptState = 8;
+      }
+    }
+  }
+  if (scriptState === 8) {
+    activateText(0, "Of course I have a choice.|Everyone does, at any given point.|Just like you do, right here and now.|You can either draw your blade and fight...|...Or I'll leave of my own volition.", 5);
+  }
+  if (scriptState === 9) {
+    gameState = -2;
+    activateText(0, "...|...Ok then.|Have at you!!", 6);
   }
 }
 
@@ -626,18 +677,32 @@ function activateText(speaker, textID, promptID) {
   breakCount = 0;
   divideText(textID);
   if (breakCount === 0) {
-    if (textState <= breakCount) {
+    if (textState < 2) {
       if (speaker === 0) {
-        image(textBoxAsset, 300, 500, 550, 150);
-        fill(255);
-        textSize(24);
-        text(textID, 250, 500, 410, 115);
+        if (promptID === 2 || promptID === 4 || promptID === 6) {
+          image(textBoxAssetYellow, 300, 500, 550, 150);
+          fill(255);
+          textSize(24);
+          text(textID, 250, 500, 410, 115);
+        }
+        else {
+          image(textBoxAsset, 300, 500, 550, 150);
+          fill(255);
+          textSize(24);
+          text(textID, 250, 500, 410, 115);
+        }
       }
       else {
         image(textBoxAsset, 300, 500, 550, 150);
         fill(255);
         textSize(24);
         text(textID, 400, 500, 410, 115);
+      }
+    }
+    else {
+      if (promptID === 2) {
+        increase = true;
+        scriptState = 5;
       }
     }
   }
@@ -664,6 +729,25 @@ function activateText(speaker, textID, promptID) {
         resetCounter();
         scriptState = 2;
       }
+      if (promptID === 3) {
+        increase = false;
+        resetCounter();
+        scriptState = 6;
+      }
+      if (promptID === 4) {
+        increase = true;
+        scriptState = 7;
+      }
+      if (promptID === 5) {
+        increase = false;
+        scriptState = 9;
+      }
+      if (promptID === 6) {
+        noStroke();
+        fill(255, 0, 0);
+        rect(300, 300, 50, 50);
+        // battleStart(1);
+      }
       else {
         gameState = 0;
       }
@@ -683,6 +767,12 @@ function divideText(textID) {
     if (textID[i] === "|") {
       breakCount += 1;
     }
+  }
+}
+
+function revertText() {
+  if (gameState !== -1) {
+    textState = 0;
   }
 }
 
@@ -731,5 +821,11 @@ function keyPressed() {
         }
       }
     }
+  }
+}
+
+function battleStart(battleID) {
+  if (battleID === 1) {
+    let naomiFighter = new PartyMember(100, 100, 9, 7, 4, 10, 9);
   }
 }
