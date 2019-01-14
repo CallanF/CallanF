@@ -62,6 +62,7 @@ let isRun = false;
 let letGo = true;
 
 class Test { //----------------------------------------------------------------}
+//Used for debug purposes only.
   constructor() {
     // this.x = 108;
     // this.y = 108;
@@ -473,6 +474,11 @@ function setup() { //----------------------------------------------------------}
 }
 
 function draw() { //-----------------------------------------------------------}
+  // console.log(scriptState);
+  // console.log(gameState);
+  // console.log(textState);
+  // console.log(gameCounter);
+  // console.log(increase);
   revertText();
   if (gameState === -3) {
     titleScreen();
@@ -530,12 +536,31 @@ function cleanupGrid() {
   toggleMap();
 }
 
+function readyGrid() {
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (grid[y][x] === "0") {
+        let ground = new Ground(x * cellSize, y * cellSize);
+        groundList.push(ground);
+      }
+      else if (grid[y][x] === "1") {
+        let wall = new Wall(x * cellSize, y * cellSize);
+        wallList.push(wall);
+      }
+      else if (grid[y][x] === "2") {
+        let obj = new Objt(x * cellSize, y * cellSize);
+        objectList.push(obj);
+      }
+    }
+  }
+}
+
 function scriptManage() {
   if (scriptState === 1) {
     gameState = -2;
     pitch.display();
     if (gameCounter >= 100) {
-      activateText(0, "...My head still hurts...|Oof...", 1);
+      activateText(0, "...My head still hurts...|...Ugh.", 1);
     }
   }
   if (scriptState === 2) {
@@ -574,28 +599,36 @@ function scriptManage() {
     }
   }
   if (scriptState === 4) {
+    bgManage();
+    hero.display();
+    sergeant.display();
     increase = false;
     resetCounter();
     activateText(0, "Get up. The captain wants to see you.", 2);
   }
   if (scriptState === 5) {
     gameState = -2;
+    bgManage();
+    hero.display();
+    sergeant.display();
     if (gameCounter >= 70) {
-      activateText(0, "...No. I'm tired.|I'll see your captain when I'm rested.", 3);
+      activateText(0, "...No. I'm tired.|I'll see your captain later.", 3);
     }
   }
   if (scriptState === 6) {
     gameState = -2;
+    bgManage();
+    hero.display();
+    sergeant.display();
     activateText(0, "You don't have much of a choice here.|You're a captive on OUR ship.", 4);
   }
   if (scriptState === 7) {
     gameState = -2;
-    let discard = true;
-    if (discard === true) {
-      hero.y += 24;
-      if (gameCounter >= 50) {
-        scriptState = 8;
-      }
+    hero.display();
+    sergeant.display();
+    bgManage();
+    if (gameCounter >= 50) {
+      scriptState = 8;
     }
   }
   if (scriptState === 8) {
@@ -604,25 +637,6 @@ function scriptManage() {
   if (scriptState === 9) {
     gameState = -2;
     activateText(0, "...|...Ok then.|Have at you!!", 6);
-  }
-}
-
-function readyGrid() {
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      if (grid[y][x] === "0") {
-        let ground = new Ground(x * cellSize, y * cellSize);
-        groundList.push(ground);
-      }
-      else if (grid[y][x] === "1") {
-        let wall = new Wall(x * cellSize, y * cellSize);
-        wallList.push(wall);
-      }
-      else if (grid[y][x] === "2") {
-        let obj = new Objt(x * cellSize, y * cellSize);
-        objectList.push(obj);
-      }
-    }
   }
 }
 
@@ -677,7 +691,7 @@ function activateText(speaker, textID, promptID) {
   breakCount = 0;
   divideText(textID);
   if (breakCount === 0) {
-    if (textState < 2) {
+    if (textState < 1) {
       if (speaker === 0) {
         if (promptID === 2 || promptID === 4 || promptID === 6) {
           image(textBoxAssetYellow, 300, 500, 550, 150);
@@ -685,19 +699,19 @@ function activateText(speaker, textID, promptID) {
           textSize(24);
           text(textID, 250, 500, 410, 115);
         }
-        else {
+        else if (promptID === 1 || promptID === 3 || promptID === 5) {
           image(textBoxAsset, 300, 500, 550, 150);
           fill(255);
           textSize(24);
           text(textID, 250, 500, 410, 115);
         }
       }
-      else {
-        image(textBoxAsset, 300, 500, 550, 150);
-        fill(255);
-        textSize(24);
-        text(textID, 400, 500, 410, 115);
-      }
+      // else {
+      //   image(textBoxAsset, 300, 500, 550, 150);
+      //   fill(255);
+      //   textSize(24);
+      //   text(textID, 400, 500, 410, 115);
+      // }
     }
     else {
       if (promptID === 2) {
@@ -710,18 +724,26 @@ function activateText(speaker, textID, promptID) {
     if (textState <= breakCount) {
       if (speaker === 0) {
         let newText = split(textID, "|");
-        image(textBoxAsset, 300, 500, 550, 150);
-        fill(255);
-        textSize(24);
-        text(newText[textState], 250, 500, 410, 115);
+        if (promptID === 2 || promptID === 4 || promptID === 6) {
+          image(textBoxAssetYellow, 300, 500, 550, 150);
+          fill(255);
+          textSize(24);
+          text(newText[textState], 250, 500, 410, 115);
+        }
+        else if (promptID === 1 || promptID === 3 || promptID === 5) {
+          image(textBoxAsset, 300, 500, 550, 150);
+          fill(255);
+          textSize(24);
+          text(newText[textState], 250, 500, 410, 115);
+        }
       }
-      else {
-        let newText = split(textID, "|");
-        image(textBoxAsset, 300, 500, 550, 150);
-        fill(255);
-        textSize(24);
-        text(newText[textState], 400, 500, 410, 115);
-      }
+      // else {
+      //   let newText = split(textID, "|");
+      //   image(textBoxAsset, 300, 500, 550, 150);
+      //   fill(255);
+      //   textSize(24);
+      //   text(newText[textState], 400, 500, 410, 115);
+      // }
     }
     else {
       if (promptID === 1) {
@@ -732,20 +754,26 @@ function activateText(speaker, textID, promptID) {
       if (promptID === 3) {
         increase = false;
         resetCounter();
+        textState = 0;
         scriptState = 6;
       }
       if (promptID === 4) {
+        resetCounter();
         increase = true;
+        hero.y += 24;
+        hero.display();
+        sergeant.display();
+        bgManage();
         scriptState = 7;
       }
       if (promptID === 5) {
         increase = false;
+        resetCounter();
         scriptState = 9;
       }
       if (promptID === 6) {
-        noStroke();
-        fill(255, 0, 0);
-        rect(300, 300, 50, 50);
+        pitch.alpha += 255;
+        pitch.display();
         // battleStart(1);
       }
       else {
