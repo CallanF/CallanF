@@ -3,6 +3,7 @@
 //Callan Fehr
 
 let testing = false;
+let testingLayouts = true;
 
 let gameState;
 let textState = 0;
@@ -54,12 +55,28 @@ let titleScreenAsset;
 
 let textBoxAsset;
 let textBoxAssetYellow;
+let cursor;
 let textLetGo = true;
 let textList = [];
 let breakCount;
 
 let isRun = false;
 let letGo = true;
+
+
+let turnState;
+let currentOption;
+let turnCount;
+let actionN;
+let actionB;
+let actionM;
+let actionC;
+let action1;
+
+let naomiList;
+let baerenList;
+let mariaList;
+let cryceList;
 
 class Test { //----------------------------------------------------------------}
 //Used for debug purposes only.
@@ -402,7 +419,7 @@ class NPC {
   }
 }
 class PartyMember {
-  constructor(h, m, o, d, i, a, l, id) {
+  constructor(h, m, o, d, i, a, l) {
     this.health = h;
     this.magic = m;
     this.offence = o;
@@ -411,20 +428,54 @@ class PartyMember {
     this.agility = a;
     this.luck = l;
   }
-  // fighterSetup() {
-  //   if (id === 1) {
-  //
-  //   }
-  // }
 }
 class Enemy {
-  constructor() {
-
+  constructor(h, m, o, d, i, a, l, gold) {
+    this.health = h;
+    this.magic = m;
+    this.offence = o;
+    this.defence = d;
+    this.initiative = i;
+    this.agility = a;
+    this.luck = l;
+    this.goldGiven = gold;
   }
 }
-class SpecialMove {
-  constructor() {
 
+class SpecialMove {
+  constructor(name) {
+    if (name === "Raise") {
+      this.name = "Charge";
+      this.user = "Naomi";
+      this.type = "Charge";
+      this.effect = 1;
+      this.limit = 3;
+    }
+  }
+  data() {
+    if (this.name === "Raise") {
+      if (this.limit === 0) {
+        this.name = "Raise";
+      }
+      else if (this.limit < 0) {
+        this.limit = 0;
+      }
+      else {
+        this.name = "Soulslay";
+        this.type = "ChargeAttack";
+        this.effect = 999;
+      }
+    }
+  }
+  activate() {
+    if (this.type === "Charge") {
+      if (this.limit < 0) {
+        this.limit -= this.effect;
+      }
+    }
+    if (this.type === "ChargeAttack") {
+      return this.effect;
+    }
   }
 }
 
@@ -448,6 +499,7 @@ function preload() { //--------------------------------------------------------}
   titleScreenAsset = loadImage("assets/Title Screen.png");
   textBoxAsset = loadImage("assets/Textbox.png");
   textBoxAssetYellow = loadImage("assets/TextboxYellow.png");
+  cursor = loadImage("assets/Cursor.png");
 }
 
 function setup() { //----------------------------------------------------------}
@@ -468,9 +520,15 @@ function setup() { //----------------------------------------------------------}
   hero = new Player();
   pitch = new Blackout();
   tester = new Test();
-
-  gameState = -3;
-  textState = 0;
+  if (testingLayouts === true) {
+    gameState = 0;
+    layout = 0;
+    scriptState = -1;
+  }
+  else {
+    gameState = -3;
+    textState = 0;
+  }
 }
 
 function draw() { //-----------------------------------------------------------}
@@ -494,6 +552,7 @@ function draw() { //-----------------------------------------------------------}
     hero.cooldown();
     hero.toggleSpeed();
     hero.move();
+    toggleMap();
   }
   detectMapChange();
   runToggle();
@@ -532,7 +591,12 @@ function cleanupGrid() {
       grid[j] = grid[j].split("");
     }
   }
-  layout = 1;
+  if (testingLayouts === true) {
+    layout = 0;
+  }
+  else {
+    layout = 1;
+  }
   toggleMap();
 }
 
@@ -677,7 +741,7 @@ function detectMapChange() {
       transition(36, 492, -1);
     }
   }
-  if (layout === 1) {
+  if (layout === -1) {
     if (hero.x === 12 && hero.y === 492) {
       gameState = -3;
       transition(564, 492, 0);
@@ -690,94 +754,99 @@ function activateText(speaker, textID, promptID) {
   textList = [];
   breakCount = 0;
   divideText(textID);
-  if (breakCount === 0) {
-    if (textState < 1) {
-      if (speaker === 0) {
-        if (promptID === 2 || promptID === 4 || promptID === 6) {
-          image(textBoxAssetYellow, 300, 500, 550, 150);
-          fill(255);
-          textSize(24);
-          text(textID, 250, 500, 410, 115);
+  if (gameState === -1) {
+    if (breakCount === 0) {
+      if (textState < 1) {
+        if (speaker === 0) {
+          if (promptID === 2 || promptID === 4 || promptID === 6) {
+            image(textBoxAssetYellow, 300, 500, 550, 150);
+            fill(255);
+            textSize(24);
+            text(textID, 250, 500, 410, 115);
+          }
+          else {
+            image(textBoxAsset, 300, 500, 550, 150);
+            fill(255);
+            textSize(24);
+            text(textID, 250, 500, 410, 115);
+          }
         }
-        else if (promptID === 1 || promptID === 3 || promptID === 5) {
-          image(textBoxAsset, 300, 500, 550, 150);
-          fill(255);
-          textSize(24);
-          text(textID, 250, 500, 410, 115);
-        }
-      }
-      // else {
-      //   image(textBoxAsset, 300, 500, 550, 150);
-      //   fill(255);
-      //   textSize(24);
-      //   text(textID, 400, 500, 410, 115);
-      // }
-    }
-    else {
-      if (promptID === 2) {
-        increase = true;
-        scriptState = 5;
-      }
-    }
-  }
-  else {
-    if (textState <= breakCount) {
-      if (speaker === 0) {
-        let newText = split(textID, "|");
-        if (promptID === 2 || promptID === 4 || promptID === 6) {
-          image(textBoxAssetYellow, 300, 500, 550, 150);
-          fill(255);
-          textSize(24);
-          text(newText[textState], 250, 500, 410, 115);
-        }
-        else if (promptID === 1 || promptID === 3 || promptID === 5) {
-          image(textBoxAsset, 300, 500, 550, 150);
-          fill(255);
-          textSize(24);
-          text(newText[textState], 250, 500, 410, 115);
-        }
-      }
-      // else {
-      //   let newText = split(textID, "|");
-      //   image(textBoxAsset, 300, 500, 550, 150);
-      //   fill(255);
-      //   textSize(24);
-      //   text(newText[textState], 400, 500, 410, 115);
-      // }
-    }
-    else {
-      if (promptID === 1) {
-        increase = false;
-        resetCounter();
-        scriptState = 2;
-      }
-      if (promptID === 3) {
-        increase = false;
-        resetCounter();
-        textState = 0;
-        scriptState = 6;
-      }
-      if (promptID === 4) {
-        resetCounter();
-        increase = true;
-        hero.y += 24;
-        hero.display();
-        sergeant.display();
-        bgManage();
-        scriptState = 7;
-      }
-      if (promptID === 5) {
-        increase = false;
-        resetCounter();
-        scriptState = 9;
-      }
-      if (promptID === 6) {
-        pitch.alpha += 255;
-        pitch.display();
-        // battleStart(1);
+        // else {
+        //   image(textBoxAsset, 300, 500, 550, 150);
+        //   fill(255);
+        //   textSize(24);
+        //   text(textID, 400, 500, 410, 115);
+        // }
       }
       else {
-        gameState = 0;
+        if (promptID === 2) {
+          increase = true;
+          scriptState = 5;
+        }
+        else {
+          gameState = 0;
+        }
+      }
+    }
+    else {
+      if (textState <= breakCount) {
+        if (speaker === 0) {
+          let newText = split(textID, "|");
+          if (promptID === 2 || promptID === 4 || promptID === 6) {
+            image(textBoxAssetYellow, 300, 500, 550, 150);
+            fill(255);
+            textSize(24);
+            text(newText[textState], 250, 500, 410, 115);
+          }
+          else {
+            image(textBoxAsset, 300, 500, 550, 150);
+            fill(255);
+            textSize(24);
+            text(newText[textState], 250, 500, 410, 115);
+          }
+        }
+        // else {
+        //   let newText = split(textID, "|");
+        //   image(textBoxAsset, 300, 500, 550, 150);
+        //   fill(255);
+        //   textSize(24);
+        //   text(newText[textState], 400, 500, 410, 115);
+        // }
+      }
+      else {
+        if (promptID === 1) {
+          increase = false;
+          resetCounter();
+          scriptState = 2;
+        }
+        if (promptID === 3) {
+          increase = false;
+          resetCounter();
+          textState = 0;
+          scriptState = 6;
+        }
+        if (promptID === 4) {
+          resetCounter();
+          increase = true;
+          hero.y += 24;
+          hero.display();
+          sergeant.display();
+          bgManage();
+          scriptState = 7;
+        }
+        if (promptID === 5) {
+          increase = false;
+          resetCounter();
+          scriptState = 9;
+        }
+        if (promptID === 6) {
+          pitch.alpha += 255;
+          pitch.display();
+          // battleStart(1);
+        }
+        else {
+          gameState = 0;
+        }
       }
     }
   }
@@ -843,17 +912,29 @@ function keyPressed() {
     }
     if (gameState === 0) {
       if (hero.objUp === true && hero.facing === "up" || hero.objLeft === true && hero.facing === "left" || hero.objDown === true && hero.facing === "down" || hero.objRight === true && hero.facing === "right") {
-        if (layout === 1) {
-          textState = 1;
-          activateText(0, "This text is a blessed mess of the best text test.");
+        if (layout === -1) {
+          textState = 0;
+          activateText(0, "This text is a blessed mess of the best text test.", -1);
         }
       }
+    }
+    if (gameState === 1) {
+      currentOption += 1;
     }
   }
 }
 
 function battleStart(battleID) {
+  turnState = 1;
+  turnCount = 0;
+  currentOption = 0;
+  gameState = 1;
   if (battleID === 1) {
     let naomiFighter = new PartyMember(100, 100, 9, 7, 4, 10, 9);
+    let charge = new SpecialMove("Raise");
+    let sergeant = new Enemy(10, 15, 26, 5, 5, 5, 3, 30);
+  }
+  if (gameState === 1) {
+    image(textBoxAsset, 300, 500, 550, 150);
   }
 }
