@@ -3,7 +3,7 @@
 //Callan Fehr
 
 let testing = false;
-let testingLayouts = true;
+let testingLayouts = false;
 
 let gameState;
 let textState = 0;
@@ -59,6 +59,7 @@ let cursor;
 let textLetGo = true;
 let textList = [];
 let breakCount;
+let isText = false;
 
 let isRun = false;
 let letGo = true;
@@ -554,6 +555,7 @@ function draw() { //-----------------------------------------------------------}
     hero.move();
     toggleMap();
   }
+  detectText();
   detectMapChange();
   runToggle();
   if (testing === true) {
@@ -750,9 +752,11 @@ function detectMapChange() {
 }
 
 function activateText(speaker, textID, promptID) {
-  gameState = -1;
-  textList = [];
-  breakCount = 0;
+  if (promptID !== -1) {
+    gameState = -1;
+    textList = [];
+    breakCount = 0;
+  }
   divideText(textID);
   if (gameState === -1) {
     if (breakCount === 0) {
@@ -783,7 +787,8 @@ function activateText(speaker, textID, promptID) {
           increase = true;
           scriptState = 5;
         }
-        else {
+        else if (promptID === -1) {
+          isText = false;
           gameState = 0;
         }
       }
@@ -852,6 +857,19 @@ function activateText(speaker, textID, promptID) {
   }
 }
 
+function detectText() {
+  if (isText === true) {
+    if (layout === -1) {
+      gameState = -1;
+      textList = [];
+      breakCount = 0;
+      activateText(0, "This is sample text.", -1);
+    }
+  }
+}
+
+//"This text is a blessed mess of the best text test."
+
 // if (keyIsPressed && key === "o") {
 //   if (textLetGo === true) {
 //     textState += 1;
@@ -914,7 +932,7 @@ function keyPressed() {
       if (hero.objUp === true && hero.facing === "up" || hero.objLeft === true && hero.facing === "left" || hero.objDown === true && hero.facing === "down" || hero.objRight === true && hero.facing === "right") {
         if (layout === -1) {
           textState = 0;
-          activateText(0, "This text is a blessed mess of the best text test.", -1);
+          isText = true;
         }
       }
     }
