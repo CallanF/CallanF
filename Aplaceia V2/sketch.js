@@ -65,14 +65,17 @@ let isRun = false;
 let letGo = true;
 
 
+let battleID;
 let turnState;
-let currentOption;
+let currentOption = 1;
 let turnCount;
 let actionN;
 let actionB;
 let actionM;
 let actionC;
 let action1;
+let playerOldX;
+let playerOldY;
 
 let naomiList;
 let baerenList;
@@ -538,6 +541,7 @@ function draw() { //-----------------------------------------------------------}
   // console.log(textState);
   // console.log(gameCounter);
   // console.log(increase);
+  // console.log(keyCode);
   revertText();
   if (gameState === -3) {
     titleScreen();
@@ -558,6 +562,7 @@ function draw() { //-----------------------------------------------------------}
   detectText();
   detectMapChange();
   runToggle();
+  battleStart();
   if (testing === true) {
     tester.display();
     tester.detectWalls();
@@ -704,6 +709,16 @@ function scriptManage() {
     gameState = -2;
     activateText(0, "...|...Ok then.|Have at you!!", 6);
   }
+  if (scriptState === 10) {
+    if (gameState === -1) {
+      playerOldX = hero.x;
+      playerOldY = hero.y;
+      turnState = 1;
+      turnCount = 0;
+      currentOption = 1;
+      gameState = 1;
+    }
+  }
 }
 
 function toggleMap() {
@@ -845,9 +860,7 @@ function activateText(speaker, textID, promptID) {
           scriptState = 9;
         }
         if (promptID === 6) {
-          pitch.alpha += 255;
-          pitch.display();
-          // battleStart(1);
+          scriptState = 10;
         }
         else {
           gameState = 0;
@@ -924,6 +937,20 @@ function deleteLists() {
 }
 
 function keyPressed() {
+  if (gameState === 1) {
+    if (turnState === 1) {
+      if (keyCode === 87) {
+        if (currentOption > 1) {
+          currentOption -= 1;
+        }
+      }
+      if (keyCode === 83) {
+        if (currentOption < 4) {
+          currentOption += 1;
+        }
+      }
+    }
+  }
   if (keyCode === 79) {
     if (gameState === -1) {
       textState += 1;
@@ -937,22 +964,34 @@ function keyPressed() {
       }
     }
     if (gameState === 1) {
-      currentOption += 1;
+      turnState += 1;
     }
   }
 }
 
-function battleStart(battleID) {
-  turnState = 1;
-  turnCount = 0;
-  currentOption = 0;
-  gameState = 1;
-  if (battleID === 1) {
-    let naomiFighter = new PartyMember(100, 100, 9, 7, 4, 10, 9);
-    let charge = new SpecialMove("Raise");
-    let sergeant = new Enemy(10, 15, 26, 5, 5, 5, 3, 30);
-  }
+function battleStart() {
   if (gameState === 1) {
-    image(textBoxAsset, 300, 500, 550, 150);
+    if (scriptState === 10) {
+      let naomiFighter = new PartyMember(100, 100, 9, 7, 4, 10, 9);
+      let charge = new SpecialMove("Raise");
+      let sergeant = new Enemy(10, 15, 26, 5, 5, 5, 3, 30);
+      hero.x = 500;
+      hero.y = 300;
+      sergeant.x = 100;
+      sergeant.y = 300;
+    }
+    pitch.alphaNum += 255;
+    pitch.display();
+    hero.display();
+    sergeant.display();
+    if (turnState === 1) {
+      image(textBoxAsset, 300, 500, 550, 150);
+      fill(255);
+      text("Fight", 450, 425);
+      text("Magic", 450, 475);
+      text("Defend", 450, 525);
+      text("Flee", 450, 575);
+      image(cursor, 400, 375 + 50 * currentOption);
+    }
   }
 }
