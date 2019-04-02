@@ -1,15 +1,23 @@
 //Factor Finder
 //A simple program to find the factors of a number, which is a lot of work sometimes
 
-let numArray;
+let numArray = 0;
+let askNum = 0;
+let finalNum;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  ask();
 }
 
 function draw() {
-  factors(372);
+  factors(finalNum);
   text(numArray, 5, 5, windowWidth - 5, windowWidth - 5);
+}
+
+function ask() {
+  askNum = prompt("Enter a number.", "0");
+  finalNum = int(askNum);
 }
 
 function factors(number) {
